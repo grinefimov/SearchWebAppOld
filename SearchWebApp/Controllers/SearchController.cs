@@ -1,21 +1,18 @@
-﻿using System.Collections.Generic;
-using System.Linq;
+﻿using System.Collections;
+using System.Collections.Generic;
 using System.Net;
-using System.Net.Http;
 using System.Threading.Tasks;
 using System.Xml;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Azure.CognitiveServices.Search.WebSearch;
 using Microsoft.Extensions.Configuration;
+using Newtonsoft.Json.Linq;
 using SearchWebApp.Models;
+using SerpApi;
 
 namespace SearchWebApp.Controllers
 {
     public class SearchController : Controller
     {
-        private readonly HttpClient _client = new HttpClient();
-        //private readonly WebSearchClient _bingClient = new WebSearchClient(new ApiKeyServiceClientCredentials("YOUR_SUBSCRIPTION_KEY"));
-
         public IConfiguration Configuration { get; }
 
         public SearchController(IConfiguration configuration)
@@ -25,26 +22,86 @@ namespace SearchWebApp.Controllers
 
         public async Task<IActionResult> Index()
         {
-            var searchString = "pear";
+            var searchString = "orange";
             searchString = searchString.Trim();
-            var yandexResult = await SearchInYandex(_client, searchString);
-            //var googleResult = await SearchInYandex(_client, "pear");
+            //var results = new List<Task<List<SearchResult>>>();
+            //var yandexResult = await SearchInYandex(searchString, Configuration["Yandex:SearchStringPart1"],
+            //    Configuration["Yandex:SearchStringPart2"]);
+            //var googleResult = await SearchInGoogle(searchString, Configuration["SerpApi:SerpApiKey"]);
+            var bingResult = await SearchInBing(searchString, Configuration["SerpApi:SerpApiKey"]);
 
-            return View(yandexResult);
+
+            return View(bingResult);
         }
 
-
-        private async Task<List<SearchResult>> SearchInGoogle(HttpClient client, string searchString)
+        private async Task<List<SearchResult>> SearchInBing(string searchString, string apiKey)
         {
+            Hashtable ht = new Hashtable();
+            ht.Add("q", searchString);
+            ht.Add("num", 15);
+
+            BingSearchResultsClient client = new BingSearchResultsClient(ht, apiKey);
+            JObject data = client.GetJson();
+
+            JArray results = (JArray) data["organic_results"];
             List<SearchResult> result = new List<SearchResult>();
+            for (int i = 0; i < results.Count || i < 10; i++)
+            {
+                var sr = new SearchResult();
+                sr.SearchString = searchString;
+                sr.Url = results[i]["link"].ToString();
+                sr.Title = results[i]["title"].ToString();
+                if (results[i]["snippet"] != null)
+                {
+                    sr.Snippet = results[i]["snippet"].ToString();
+                }
+                else
+                {
+                    sr.Snippet = "";
+                }
+
+                result.Add(sr);
+            }
 
             return result;
         }
 
-        private async Task<List<SearchResult>> SearchInYandex(HttpClient client, string searchString)
+        private async Task<List<SearchResult>> SearchInGoogle(string searchString, string apiKey)
         {
-            string uri = Configuration["Yandex:SearchStringPart1"] + searchString +
-                         Configuration["Yandex:SearchStringPart2"];
+            Hashtable ht = new Hashtable();
+            ht.Add("q", searchString);
+            ht.Add("num", 15);
+
+            GoogleSearchResultsClient client = new GoogleSearchResultsClient(ht, apiKey);
+            JObject data = client.GetJson();
+            
+            JArray results = (JArray) data["organic_results"];
+            List<SearchResult> result = new List<SearchResult>();
+            for (int i = 0; i < results.Count || i < 10; i++)
+            {
+                var sr = new SearchResult();
+                sr.SearchString = searchString;
+                sr.Url = results[i]["link"].ToString();
+                sr.Title = results[i]["title"].ToString();
+                if (results[i]["snippet"] != null)
+                {
+                    sr.Snippet = results[i]["snippet"].ToString();
+                }
+                else
+                {
+                    sr.Snippet = "";
+                }
+
+                result.Add(sr);
+            }
+
+            return result;
+        }
+
+        private async Task<List<SearchResult>> SearchInYandex(string searchString, string searchStringPart1,
+            string searchStringPart2)
+        {
+            string uri = searchStringPart1 + searchString + searchStringPart2;
             string xmlString;
             using (var wc = new WebClient())
             {
@@ -55,8 +112,8 @@ namespace SearchWebApp.Controllers
             xml.LoadXml(xmlString);
 
             List<SearchResult> result = new List<SearchResult>();
-            foreach (XmlNode doc in xml.DocumentElement.SelectNodes("/yandexsearch/response/results/grouping/group/doc")
-            )
+            foreach (XmlNode doc in xml.DocumentElement.SelectNodes(
+                "/yandexsearch/response/results/grouping/group/doc"))
             {
                 var sr = new SearchResult();
                 sr.SearchString = searchString;
@@ -73,35 +130,6 @@ namespace SearchWebApp.Controllers
                 else sr.Snippet = "";
 
                 result.Add(sr);
-            }
-
-            return result;
-        }
-
-        private async Task<List<string>> SearchInBing(WebSearchClient client)
-        {
-            List<string> result = new List<string>();
-
-            var webData = await client.Web.SearchAsync(query: "wiki");
-
-            if (webData?.WebPages?.Value?.Count > 0)
-            {
-                var firstWebPagesResult = webData.WebPages.Value.FirstOrDefault();
-
-                if (firstWebPagesResult != null)
-                {
-                    result.Add("Webpage Results # " + webData.WebPages.Value.Count);
-                    result.Add("First web page name: " + firstWebPagesResult.Name);
-                    result.Add("First web page URL: " + firstWebPagesResult.Url);
-                }
-                else
-                {
-                    result.Add("Didn't find any web pages...");
-                }
-            }
-            else
-            {
-                result.Add("Didn't find any web pages...");
             }
 
             return result;
