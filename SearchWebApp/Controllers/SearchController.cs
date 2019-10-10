@@ -13,95 +13,38 @@ namespace SearchWebApp.Controllers
 {
     public class SearchController : Controller
     {
+        private readonly string _apiKey;
+
         public IConfiguration Configuration { get; }
 
         public SearchController(IConfiguration configuration)
         {
             Configuration = configuration;
+            _apiKey = Configuration["SerpApi:SerpApiKey"];
         }
 
         public async Task<IActionResult> Index()
         {
             var searchString = "orange";
             searchString = searchString.Trim();
+
+            var ht = new Hashtable {{"q", searchString}, {"num", 15}};
+            var bingClient = new BingSearchResultsClient(ht, _apiKey);
+            var googleClient = new GoogleSearchResultsClient(ht, _apiKey);
+
             //var results = new List<Task<List<SearchResult>>>();
-            //var yandexResult = await SearchInYandex(searchString, Configuration["Yandex:SearchStringPart1"],
-            //    Configuration["Yandex:SearchStringPart2"]);
-            //var googleResult = await SearchInGoogle(searchString, Configuration["SerpApi:SerpApiKey"]);
-            var bingResult = await SearchInBing(searchString, Configuration["SerpApi:SerpApiKey"]);
+            var yandexResult = await SearchInYandex(searchString, Configuration["Yandex:SearchStringPart1"],
+                Configuration["Yandex:SearchStringPart2"]);
+            var googleResult = await SearchWithSerpApi(searchString, googleClient);
+            var bingResult = await SearchWithSerpApi(searchString, bingClient);
 
-
-            return View(bingResult);
-        }
-
-        private async Task<List<SearchResult>> SearchInBing(string searchString, string apiKey)
-        {
-            Hashtable ht = new Hashtable();
-            ht.Add("q", searchString);
-            ht.Add("num", 15);
-
-            BingSearchResultsClient client = new BingSearchResultsClient(ht, apiKey);
-            JObject data = client.GetJson();
-
-            JArray results = (JArray) data["organic_results"];
-            List<SearchResult> result = new List<SearchResult>();
-            for (int i = 0; i < results.Count || i < 10; i++)
-            {
-                var sr = new SearchResult();
-                sr.SearchString = searchString;
-                sr.Url = results[i]["link"].ToString();
-                sr.Title = results[i]["title"].ToString();
-                if (results[i]["snippet"] != null)
-                {
-                    sr.Snippet = results[i]["snippet"].ToString();
-                }
-                else
-                {
-                    sr.Snippet = "";
-                }
-
-                result.Add(sr);
-            }
-
-            return result;
-        }
-
-        private async Task<List<SearchResult>> SearchInGoogle(string searchString, string apiKey)
-        {
-            Hashtable ht = new Hashtable();
-            ht.Add("q", searchString);
-            ht.Add("num", 15);
-
-            GoogleSearchResultsClient client = new GoogleSearchResultsClient(ht, apiKey);
-            JObject data = client.GetJson();
-            
-            JArray results = (JArray) data["organic_results"];
-            List<SearchResult> result = new List<SearchResult>();
-            for (int i = 0; i < results.Count || i < 10; i++)
-            {
-                var sr = new SearchResult();
-                sr.SearchString = searchString;
-                sr.Url = results[i]["link"].ToString();
-                sr.Title = results[i]["title"].ToString();
-                if (results[i]["snippet"] != null)
-                {
-                    sr.Snippet = results[i]["snippet"].ToString();
-                }
-                else
-                {
-                    sr.Snippet = "";
-                }
-
-                result.Add(sr);
-            }
-
-            return result;
+            return View(googleResult);
         }
 
         private async Task<List<SearchResult>> SearchInYandex(string searchString, string searchStringPart1,
             string searchStringPart2)
         {
-            string uri = searchStringPart1 + searchString + searchStringPart2;
+            var uri = searchStringPart1 + searchString + searchStringPart2;
             string xmlString;
             using (var wc = new WebClient())
             {
@@ -111,7 +54,7 @@ namespace SearchWebApp.Controllers
             var xml = new XmlDocument();
             xml.LoadXml(xmlString);
 
-            List<SearchResult> result = new List<SearchResult>();
+            var result = new List<SearchResult>();
             foreach (XmlNode doc in xml.DocumentElement.SelectNodes(
                 "/yandexsearch/response/results/grouping/group/doc"))
             {
@@ -128,6 +71,25 @@ namespace SearchWebApp.Controllers
                     sr.Snippet = doc.SelectSingleNode("passages/passage").InnerText;
                 }
                 else sr.Snippet = "";
+
+                result.Add(sr);
+            }
+
+            return result;
+        }
+
+        private async Task<List<SearchResult>> SearchWithSerpApi(string searchString, SerpApiClient client)
+        {
+            var data = client.GetJson();
+            var results = (JArray) data["organic_results"];
+            var result = new List<SearchResult>();
+            for (var i = 0; i < 10 && i < results.Count; i++)
+            {
+                var sr = new SearchResult();
+                sr.SearchString = searchString;
+                sr.Url = results[i]["link"].ToString();
+                sr.Title = results[i]["title"].ToString();
+                sr.Snippet = results[i]["snippet"] != null ? results[i]["snippet"].ToString() : "";
 
                 result.Add(sr);
             }
