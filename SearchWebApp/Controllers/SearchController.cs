@@ -29,7 +29,14 @@ namespace SearchWebApp.Controllers
 
         public async Task<IActionResult> Index()
         {
-            var searchString = "banana";
+            return View(new List<SearchResult>());
+        }
+
+
+        [HttpPost]
+        [Route("/Search")]
+        public async Task<IActionResult> Search(string searchString)
+        {
             searchString = searchString.Trim();
 
             var ht = new Hashtable {{"q", searchString}, {"num", 15}};
@@ -43,7 +50,7 @@ namespace SearchWebApp.Controllers
                 Task.Run(() => SearchWithSerpApi(searchString, bingClient))
             };
 
-            return View(await Task.WhenAny(resultTasks).Result);
+            return View("Index", await Task.WhenAny(resultTasks).Result);
         }
 
         private async Task<List<SearchResult>> SearchInYandexAsync(string searchString, string searchStringPart1,
