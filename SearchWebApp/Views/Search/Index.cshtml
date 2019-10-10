@@ -8,9 +8,9 @@
 @for (int i = 0; i < Model.Count; i++)
 {
 <div class="mb-3">
-  <div class="mb-2">@(i + 1)</div>
-  <div class="mb-2">@Model[i].Url</div>
-  <div class="mb-2">@Model[i].Title</div>
-  <div class="mb-2">@Model[i].Snippet</div>
+  <div>@(i + 1)</div>
+  <div><a href="@Model[i].Url" target="_blank">@Model[i].Title</a></div>
+  <div><a href="@Model[i].Url" target="_blank">@Model[i].Url</a></div>
+  <div>@Model[i].Snippet</div>
 </div>
 }

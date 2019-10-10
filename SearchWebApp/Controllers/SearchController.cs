@@ -14,6 +14,8 @@ namespace SearchWebApp.Controllers
     public class SearchController : Controller
     {
         private readonly string _apiKey;
+        private readonly string _searchStringPart1;
+        private readonly string _searchStringPart2;
 
         public IConfiguration Configuration { get; }
 
@@ -21,27 +23,30 @@ namespace SearchWebApp.Controllers
         {
             Configuration = configuration;
             _apiKey = Configuration["SerpApi:SerpApiKey"];
+            _searchStringPart1 = Configuration["Yandex:SearchStringPart1"];
+            _searchStringPart2 = Configuration["Yandex:SearchStringPart2"];
         }
 
         public async Task<IActionResult> Index()
         {
-            var searchString = "orange";
+            var searchString = "banana";
             searchString = searchString.Trim();
 
             var ht = new Hashtable {{"q", searchString}, {"num", 15}};
             var bingClient = new BingSearchResultsClient(ht, _apiKey);
             var googleClient = new GoogleSearchResultsClient(ht, _apiKey);
 
-            //var results = new List<Task<List<SearchResult>>>();
-            var yandexResult = await SearchInYandex(searchString, Configuration["Yandex:SearchStringPart1"],
-                Configuration["Yandex:SearchStringPart2"]);
-            var googleResult = await SearchWithSerpApi(searchString, googleClient);
-            var bingResult = await SearchWithSerpApi(searchString, bingClient);
+            var resultTasks = new List<Task<List<SearchResult>>>()
+            {
+                SearchInYandexAsync(searchString, _searchStringPart1, _searchStringPart2),
+                Task.Run(() => SearchWithSerpApi(searchString, googleClient)),
+                Task.Run(() => SearchWithSerpApi(searchString, bingClient))
+            };
 
-            return View(googleResult);
+            return View(await Task.WhenAny(resultTasks).Result);
         }
 
-        private async Task<List<SearchResult>> SearchInYandex(string searchString, string searchStringPart1,
+        private async Task<List<SearchResult>> SearchInYandexAsync(string searchString, string searchStringPart1,
             string searchStringPart2)
         {
             var uri = searchStringPart1 + searchString + searchStringPart2;
@@ -78,7 +83,7 @@ namespace SearchWebApp.Controllers
             return result;
         }
 
-        private async Task<List<SearchResult>> SearchWithSerpApi(string searchString, SerpApiClient client)
+        private List<SearchResult> SearchWithSerpApi(string searchString, SerpApiClient client)
         {
             var data = client.GetJson();
             var results = (JArray) data["organic_results"];
