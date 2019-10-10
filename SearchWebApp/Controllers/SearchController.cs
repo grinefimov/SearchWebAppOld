@@ -33,8 +33,8 @@ namespace SearchWebApp.Controllers
             searchString = searchString.Trim();
 
             var ht = new Hashtable {{"q", searchString}, {"num", 15}};
-            var bingClient = new BingSearchResultsClient(ht, _apiKey);
             var googleClient = new GoogleSearchResultsClient(ht, _apiKey);
+            var bingClient = new BingSearchResultsClient(ht, _apiKey);
 
             var resultTasks = new List<Task<List<SearchResult>>>()
             {
@@ -65,6 +65,7 @@ namespace SearchWebApp.Controllers
             {
                 var sr = new SearchResult();
                 sr.SearchString = searchString;
+                sr.SearchService = "Yandex";
                 sr.Url = doc.SelectSingleNode("url").InnerText;
                 sr.Title = doc.SelectSingleNode("title").InnerText;
                 if (doc.SelectSingleNode("headline") != null)
@@ -92,6 +93,7 @@ namespace SearchWebApp.Controllers
             {
                 var sr = new SearchResult();
                 sr.SearchString = searchString;
+                sr.SearchService = client.GetType() == typeof(GoogleSearchResultsClient) ? "Google" : "Bing";
                 sr.Url = results[i]["link"].ToString();
                 sr.Title = results[i]["title"].ToString();
                 sr.Snippet = results[i]["snippet"] != null ? results[i]["snippet"].ToString() : "";
