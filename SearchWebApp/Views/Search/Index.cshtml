@@ -6,11 +6,11 @@
 
 <h2 class="text-center mb-3">Search</h2>
 
-<form action="/Search" method="post">
+<form asp-controller="Search" asp-action="Search" method="post">
   <div class="row justify-content-center">
     <div class="col-sm-9 col-xl-6">
       <div class="form-group">
-        <input name="searchString" type="search" class="form-control" placeholder="Search" value="@Model.SearchString">
+        <input name="searchString" type="search" class="form-control" placeholder="Search" value="@Model?.SearchString">
       </div>
     </div>
     <div class="col-auto col-sm-1 pl-0">
@@ -19,24 +19,24 @@
   </div>
 </form>
 
-@if (Model.SearchResults.Count > 0)
+@if (Model != null && Model.SearchResults.Count > 0)
 {
-  <h4>@Model.SearchResults[0].SearchService</h4>
+  <h4 class="mb-3">Results from @(Model.SearchResults[0]?.SearchService):</h4>
 
-@for (int i = 0; i < Model.SearchResults.Count; i++)
- {
-   <div class="mb-3">
-     <div>
-       <h5 class="mb-1">
-         <a href="@Model.SearchResults[i].Url" target="_blank">@Model.SearchResults[i].Title</a>
-       </h5>
+  @for (int i = 0; i < Model.SearchResults.Count; i++)
+   {
+     <div class="mb-3">
+       <div>
+         <h5 class="mb-1">
+           <a href="@Model.SearchResults[i].Url" target="_blank">@Model.SearchResults[i].Title</a>
+         </h5>
+       </div>
+       <div>
+         <a href="@Model.SearchResults[i].Url" target="_blank">
+           <cite>@Model.SearchResults[i].Url</cite>
+         </a>
+       </div>
+       <div>@Model.SearchResults[i].Snippet</div>
      </div>
-     <div>
-       <a href="@Model.SearchResults[i].Url" target="_blank">
-         <cite>@Model.SearchResults[i].Url</cite>
-       </a>
-     </div>
-     <div>@Model.SearchResults[i].Snippet</div>
-   </div>
- }
+   }
 }

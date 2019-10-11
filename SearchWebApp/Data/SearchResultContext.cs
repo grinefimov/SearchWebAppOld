@@ -9,6 +9,8 @@ namespace SearchWebApp.Data
         {
         }
 
+        public SearchResultContext() {}
+
         public DbSet<SearchResult> SearchResults { get; set; }
     }
 }
