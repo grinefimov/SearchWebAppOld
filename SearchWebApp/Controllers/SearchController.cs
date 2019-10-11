@@ -32,14 +32,14 @@ namespace SearchWebApp.Controllers
 
         public IActionResult Index()
         {
-            return View(new List<SearchResult>());
+            return View(new SearchViewModel());
         }
 
         [HttpPost]
         [Route("/Search")]
         public async Task<IActionResult> SearchAsync(string searchString)
         {
-            if(searchString == null) { return View("Index", new List<SearchResult>()); }
+            if(searchString == null) { return View("Index", new SearchViewModel()); }
 
             searchString = searchString.Trim();
 
@@ -59,7 +59,13 @@ namespace SearchWebApp.Controllers
             _context.SearchResults.AddRange(results);
             await _context.SaveChangesAsync();
 
-            return View("Index", results);
+            var model = new SearchViewModel()
+            {
+                SearchResults = results,
+                SearchString = searchString
+            };
+
+            return View("Index", model);
         }
 
         private async Task<List<SearchResult>> SearchInYandexAsync(string searchString, string searchStringPart1,
@@ -124,12 +130,12 @@ namespace SearchWebApp.Controllers
 
         public IActionResult Results()
         {
-            return View(new List<SearchResult>());
+            return View(new SearchViewModel());
         }
 
         public IActionResult SearchResults(string searchString)
         {
-            if (searchString == null) { return View("Results", new List<SearchResult>()); }
+            if (searchString == null) { return View("Results", new SearchViewModel()); }
 
             var results = new List<SearchResult>()
             {
@@ -140,7 +146,13 @@ namespace SearchWebApp.Controllers
                 }
             };
 
-            return View("Results", results);
+            var model = new SearchViewModel()
+            {
+                SearchResults = results,
+                SearchString = searchString
+            };
+
+            return View("Results", model);
         }
     }
 }
