@@ -27,15 +27,14 @@ namespace SearchWebApp.Controllers
             _searchStringPart2 = Configuration["Yandex:SearchStringPart2"];
         }
 
-        public async Task<IActionResult> Index()
+        public IActionResult Index()
         {
             return View(new List<SearchResult>());
         }
 
-
         [HttpPost]
         [Route("/Search")]
-        public async Task<IActionResult> Search(string searchString)
+        public async Task<IActionResult> SearchAsync(string searchString)
         {
             searchString = searchString.Trim();
 
@@ -109,6 +108,13 @@ namespace SearchWebApp.Controllers
             }
 
             return result;
+        }
+
+
+
+        public IActionResult Results()
+        {
+            return View(new List<SearchResult>());
         }
     }
 }
