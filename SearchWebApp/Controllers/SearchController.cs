@@ -6,6 +6,7 @@ using System.Xml;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Newtonsoft.Json.Linq;
+using SearchWebApp.Data;
 using SearchWebApp.Models;
 using SerpApi;
 
@@ -16,15 +17,17 @@ namespace SearchWebApp.Controllers
         private readonly string _apiKey;
         private readonly string _searchStringPart1;
         private readonly string _searchStringPart2;
+        private readonly SearchResultContext _context;
 
         public IConfiguration Configuration { get; }
 
-        public SearchController(IConfiguration configuration)
+        public SearchController(IConfiguration configuration, SearchResultContext context)
         {
             Configuration = configuration;
             _apiKey = Configuration["SerpApi:SerpApiKey"];
             _searchStringPart1 = Configuration["Yandex:SearchStringPart1"];
             _searchStringPart2 = Configuration["Yandex:SearchStringPart2"];
+            _context = context;
         }
 
         public IActionResult Index()
@@ -36,6 +39,8 @@ namespace SearchWebApp.Controllers
         [Route("/Search")]
         public async Task<IActionResult> SearchAsync(string searchString)
         {
+            if(searchString == null) { return View("Index", new List<SearchResult>()); }
+
             searchString = searchString.Trim();
 
             var ht = new Hashtable {{"q", searchString}, {"num", 15}};
@@ -49,7 +54,12 @@ namespace SearchWebApp.Controllers
                 Task.Run(() => SearchWithSerpApi(searchString, bingClient))
             };
 
-            return View("Index", await Task.WhenAny(resultTasks).Result);
+            var results = await Task.WhenAny(resultTasks).Result;
+
+            _context.SearchResults.AddRange(results);
+            await _context.SaveChangesAsync();
+
+            return View("Index", results);
         }
 
         private async Task<List<SearchResult>> SearchInYandexAsync(string searchString, string searchStringPart1,
@@ -115,6 +125,22 @@ namespace SearchWebApp.Controllers
         public IActionResult Results()
         {
             return View(new List<SearchResult>());
+        }
+
+        public IActionResult SearchResults(string searchString)
+        {
+            if (searchString == null) { return View("Results", new List<SearchResult>()); }
+
+            var results = new List<SearchResult>()
+            {
+                new SearchResult()
+                {
+                    Id = 0, SearchString = "Test Search String", SearchService = "Test Search Service",
+                    Url = "Test URI", Title = "Test Title", Snippet = "Test Snippet"
+                }
+            };
+
+            return View("Results", results);
         }
     }
 }
