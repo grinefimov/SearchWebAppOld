@@ -10,11 +10,11 @@
   <div class="row justify-content-center">
     <div class="col-sm-9 col-xl-6">
       <div class="form-group">
-        <input name="searchString" type="search" class="form-control" placeholder="Search" value="@Model?.SearchString">
+        <input id="searchStringInput" name="searchString" type="search" class="form-control" placeholder="Search" value="@Model?.SearchString">
       </div>
     </div>
     <div class="col-auto col-sm-1 pl-0">
-      <button type="submit" class="btn btn-primary">Search</button>
+      <button id="submitButton" type="submit" class="btn btn-primary" onClick="return isInputNotEmpty('searchStringInput')">Search</button>
     </div>
   </div>
 </form>
