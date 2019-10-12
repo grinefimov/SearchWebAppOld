@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -21,8 +22,12 @@ namespace SearchWebApp
         {
             services.AddControllersWithViews();
 
+            var builder = new SqlConnectionStringBuilder(
+                Configuration.GetConnectionString("SearchWebApp"));
+            builder.Password = Configuration["DatabasePassword"];
+
             services.AddDbContext<SearchResultContext>(options =>
-                options.UseSqlServer(Configuration.GetConnectionString("SearchWebApp")));
+                options.UseSqlServer(builder.ConnectionString));
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
@@ -46,7 +51,7 @@ namespace SearchWebApp
             {
                 endpoints.MapControllerRoute(
                     name: "default",
-                    pattern: "{controller=Search}/{action=Index}");
+                    pattern: "{controller=Search}/{action=Search}");
             });
         }
     }

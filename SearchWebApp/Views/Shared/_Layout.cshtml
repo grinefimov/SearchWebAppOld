@@ -13,15 +13,14 @@
 <header>
   <nav class="navbar navbar-expand-sm navbar-light bg-light">
     <div class="container">
-      <a class="navbar-brand" asp-controller="Search" asp-action="Index">SearchWebApp</a>
-      <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <a class="navbar-brand" asp-controller="Search" asp-action="Search">SearchWebApp</a>
+      <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent">
         <span class="navbar-toggler-icon"></span>
       </button>
-
       <div class="collapse navbar-collapse" id="navbarSupportedContent">
         <ul class="navbar-nav mr-auto">
-          <li class="nav-item active">
-            <a class="nav-link" asp-controller="Search" asp-action="Index">Search<span class="sr-only">(current)</span></a>
+          <li class="nav-item">
+            <a class="nav-link" asp-controller="Search" asp-action="Search">Search</a>
           </li>
           <li class="nav-item">
             <a class="nav-link" asp-controller="Search" asp-action="Results">Results</a>

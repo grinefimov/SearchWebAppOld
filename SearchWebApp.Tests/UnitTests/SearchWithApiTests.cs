@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using SearchWebApp.Helpers;
 using SearchWebApp.Models;
 using SerpApi;
 using Xunit;

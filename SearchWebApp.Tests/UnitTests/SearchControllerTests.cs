@@ -20,7 +20,7 @@ namespace SearchWebApp.Tests.UnitTests
             var controller = new SearchController(mockConfiguration.Object, mockContext.Object);
 
             // Act
-            var result = controller.Index();
+            var result = controller.Search();
 
             // Assert
             var viewResult = Assert.IsType<ViewResult>(result);

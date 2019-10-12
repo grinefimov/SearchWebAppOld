@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using SearchWebApp.Data;
+using SearchWebApp.Helpers;
 using SearchWebApp.Models;
 using SerpApi;
 
@@ -24,10 +25,10 @@ namespace SearchWebApp.Controllers
             Configuration = configuration;
             _yandexSearchString = Configuration["Yandex:SearchString"];
             _apiKey = Configuration["SerpApi:SerpApiKey"];
-            _context = (SearchResultContext) context;
+            _context = context;
         }
 
-        public IActionResult Index()
+        public IActionResult Search()
         {
             return View(null);
         }
@@ -35,9 +36,9 @@ namespace SearchWebApp.Controllers
         [HttpPost]
         public async Task<IActionResult> Search(string searchString)
         {
-            if (String.IsNullOrEmpty(searchString))
+            if (string.IsNullOrEmpty(searchString))
             {
-                return View("Index", null);
+                return View("Search", null);
             }
 
             searchString = searchString.Trim();
@@ -53,7 +54,7 @@ namespace SearchWebApp.Controllers
                 SearchString = searchString
             };
 
-            return View("Index", model);
+            return View("Search", model);
         }
 
         public IActionResult Results()
@@ -63,7 +64,7 @@ namespace SearchWebApp.Controllers
 
         public IActionResult SearchResults(string searchString)
         {
-            if (String.IsNullOrEmpty(searchString))
+            if (string.IsNullOrEmpty(searchString))
             {
                 return View("Results", null);
             }
