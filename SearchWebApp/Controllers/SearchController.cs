@@ -23,8 +23,8 @@ namespace SearchWebApp.Controllers
         public SearchController(IConfiguration configuration, SearchResultContext context)
         {
             Configuration = configuration;
-            _yandexSearchString = Configuration["Yandex:SearchString"];
-            _apiKey = Configuration["SerpApi:SerpApiKey"];
+            _yandexSearchString = Configuration["YandexSearchString"];
+            _apiKey = Configuration["SerpApiKey"];
             _context = context;
         }
 
@@ -89,7 +89,7 @@ namespace SearchWebApp.Controllers
 
         private async Task<List<SearchResult>> GetSearchWithApiResults(string searchString)
         {
-            var ht = new Hashtable { { "q", searchString }, { "num", 15 } };
+            var ht = new Hashtable { { "q", searchString }, { "num", 20 } };
             var googleClient = new GoogleSearchResultsClient(ht, _apiKey);
             var bingClient = new BingSearchResultsClient(ht, _apiKey);
 
