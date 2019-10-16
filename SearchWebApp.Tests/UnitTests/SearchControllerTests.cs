@@ -32,13 +32,10 @@ namespace SearchWebApp.Tests.UnitTests
         {
             // Arrange
             var mockConfiguration = new Mock<IConfiguration>();
-            var yandexSearchString =
-                "https://yandex.com/search/xml?user=grinefimov&key=03.44608562:de43bbf914fad85361a7c78d6dbd7165&" +
-                "query=[query]&l10n=en&sortby=rlv&filter=none&maxpassages=1&" +
-                "groupby=attr%3D%22%22.mode%3Dflat.groups-on-page%3D10.docs-in-group%3D1&page=0";
+            var yandexSearchString = "yandexSearchString";
             var apiKey = "tempApiKey";
-            mockConfiguration.Setup(c => c["Yandex:SearchString"]).Returns(yandexSearchString);
-            mockConfiguration.Setup(c => c["SerpApi:SerpApiKey"]).Returns(apiKey);
+            mockConfiguration.Setup(c => c["YandexSearchString"]).Returns(yandexSearchString);
+            mockConfiguration.Setup(c => c["SerpApiKey"]).Returns(apiKey);
 
             var context = SearchResultContextMocker.GetSearchResultContext(
                 nameof(Search_SaveResultsToDBAndReturnCorrectModel_WithNotEmptySearchString));

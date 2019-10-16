@@ -3,10 +3,9 @@ using System.Net;
 using System.Threading.Tasks;
 using System.Xml;
 using Newtonsoft.Json.Linq;
-using SearchWebApp.Models;
 using SerpApi;
 
-namespace SearchWebApp.Helpers
+namespace SearchWebApp.Models
 {
     public static class SearchWithApi
     {

@@ -1,6 +1,5 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
-using SearchWebApp.Helpers;
 using SearchWebApp.Models;
 using SerpApi;
 using Xunit;
@@ -14,10 +13,7 @@ namespace SearchWebApp.Tests.UnitTests
         {
             // Arrange
             var searchString = "test";
-            var yandexSearchString =
-                "https://yandex.com/search/xml?user=grinefimov&key=03.44608562:de43bbf914fad85361a7c78d6dbd7165&" +
-                "query=[query]&l10n=en&sortby=rlv&filter=none&maxpassages=1&" +
-                "groupby=attr%3D%22%22.mode%3Dflat.groups-on-page%3D10.docs-in-group%3D1&page=0";
+            var yandexSearchString = "yandexSearchString";
 
             // Act
             var result = await SearchWithApi.SearchInYandexAsync(searchString, yandexSearchString);

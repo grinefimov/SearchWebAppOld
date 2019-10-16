@@ -1,4 +1,3 @@
-using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -6,7 +5,6 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using SearchWebApp.Data;
-using SearchWebApp.Helpers;
 using SearchWebApp.Models;
 using SerpApi;
 
@@ -34,6 +32,7 @@ namespace SearchWebApp.Controllers
         }
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> Search(string searchString)
         {
             if (string.IsNullOrEmpty(searchString))
